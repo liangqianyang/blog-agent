@@ -1,0 +1,34 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    # 只暴露给本机（agent 走 docker 网络访问，不直接对公网开 6333）
+    ports:
+      - "127.0.0.1:6333:6333"
+
+  agent:
+    build: .
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      # 覆盖 .env.production 里的 QDRANT_URL：compose 网络内走服务名
+      QDRANT_URL: http://qdrant:6333
+      APP_ENV: production
+    ports:
+      # 只绑本机，由 nginx 反代对外；如需直连调试再改
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./data:/app/data # sqlite 会话与同步状态
+    depends_on:
+      - qdrant
+    healthcheck:
+      test: ["CMD", ".venv/bin/python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  qdrant_storage:
