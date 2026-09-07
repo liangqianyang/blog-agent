@@ -21,7 +21,7 @@ from pathlib import Path
 
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
@@ -245,6 +245,36 @@ async def chat(req: ChatRequest, request: Request) -> EventSourceResponse:
             yield _sse("error", {"message": _friendly_error(exc)})
 
     return EventSourceResponse(gen(), ping=15)
+
+
+@app.get("/api/search")
+async def agent_search(
+    request: Request,
+    q: str = Query(min_length=1, max_length=400),
+    top_k: int = Query(default=8, ge=1, le=20),
+) -> dict:
+    """语义检索：问题 → 向量 → Qdrant top_k，返回命中片段（不走 LLM，毫秒级）。"""
+    if _rate_limited(request.client.host if request.client else "unknown"):
+        raise HTTPException(status_code=429, detail="请求过于频繁，请稍后再试")
+    indexer: ArticleIndexer = request.app.state.indexer
+    points = await indexer.search(q, top_k)
+    results = []
+    for p in points:
+        payload = p.payload or {}
+        text = payload.get("text", "")
+        results.append(
+            {
+                "title": payload.get("article_title", ""),
+                "url": payload.get("article_url", ""),
+                "heading": payload.get("heading_path", ""),
+                "score": round(p.score, 3),
+                "text": text[:220] + ("…" if len(text) > 220 else ""),
+                "category": payload.get("category"),
+                "labels": payload.get("labels", []),
+                "published_at": payload.get("published_at"),
+            }
+        )
+    return {"query": q, "results": results}
 
 
 @app.get("/api/history/{thread_id}")

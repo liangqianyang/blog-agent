@@ -87,6 +87,7 @@ php artisan queue:work --queue=blog-agent --tries=3 --sleep=1
 | 端点 | 说明 |
 |---|---|
 | `POST /api/chat` | SSE 流式问答，body `{thread_id?, message}`；事件序列 status → sources → delta* → done/error |
+| `GET /api/search?q=&top_k=` | 语义检索（不走 LLM）：返回命中的文章片段/章节/相关度，供前端检索页 |
 | `GET /api/history/{thread_id}` | 恢复会话历史 |
 | `POST /api/admin/sync` | 触发后台全量增量同步，头 `X-Sync-Token`（.env 的 ADMIN_SYNC_TOKEN） |
 | `POST /api/admin/sync-article` | 单篇实时同步，body `{article_id: 加密串, action: index\|delete}`，博客 Observer 调用 |
