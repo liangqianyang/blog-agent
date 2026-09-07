@@ -7,8 +7,6 @@ services:
     # 只暴露给本机（agent 走 docker 网络访问，不直接对公网开 6333）
     ports:
       - "127.0.0.1:6333:6333"
-    networks:
-      - liangqy-dev_dev-network
 
   agent:
     build: .
