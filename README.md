@@ -2,6 +2,7 @@
 
 基于博客文章的 RAG 问答助手：LangChain + LangGraph + Qdrant + FastAPI。
 
+**[→ 教学文档](docs/tutorial.md)**（原理、逐模块精讲、设计决策、踩坑实录——为学习目的而写）
 **[→ 生产部署手册](docs/deploy.md)**（Docker Compose + nginx 反代 + Laravel 侧接入，含验收清单）
 
 从博客后台（blog-admin-v2）的公开 API 同步文章，向量化后存入 Qdrant，
