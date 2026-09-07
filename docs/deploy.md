@@ -56,7 +56,7 @@ curl http://127.0.0.1:8000/api/health
 
 ```nginx
 location /agent-api/ {
-    proxy_pass http://127.0.0.1:8000/;
+    proxy_pass http://agent:8000/;
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -68,6 +68,10 @@ location /agent-api/ {
     proxy_read_timeout 300s;
 }
 ```
+
+> **容器网络注意**：nginx 也跑在容器里时，`proxy_pass` 不能写 `127.0.0.1:8000`
+> （那是 nginx 容器自己的 loopback）。推荐 `docker network connect <agent网络> <nginx容器>`
+> 后用服务名 `http://agent:8000/`；nginx 与 Laravel worker（php 容器）可共用这一个网络接法。
 
 `nginx -t && nginx -s reload` 后验证：`curl -N https://前台域名/agent-api/api/health`。
 

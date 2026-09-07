@@ -35,3 +35,7 @@ services:
 volumes:
   qdrant_storage:
   agent_data:
+
+networks:
+  dev-network:
+    driver: bridge
