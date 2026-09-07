@@ -17,7 +17,8 @@ RUN uv sync --frozen --no-dev
 FROM python:3.12-slim
 
 WORKDIR /app
-RUN groupadd -r app && useradd -r -g app app
+# 固定 UID/GID：宿主机如需 bind mount 可对应 chown 1000:1000
+RUN groupadd -g 1000 app && useradd -u 1000 -g 1000 -m app
 
 COPY --from=builder /app /app
 RUN mkdir -p /app/data && chown -R app:app /app

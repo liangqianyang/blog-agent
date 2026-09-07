@@ -20,7 +20,9 @@ services:
       # 只绑本机，由 nginx 反代对外；如需直连调试再改
       - "127.0.0.1:8000:8000"
     volumes:
-      - ./data:/app/data # sqlite 会话与同步状态
+      # named volume 而非 bind mount：首次使用会继承镜像内 /app/data 的属主（app 用户），
+      # 避免 bind mount 宿主机 root 属主导致容器内 sqlite 写入失败
+      - agent_data:/app/data
     depends_on:
       - qdrant
     healthcheck:
@@ -32,3 +34,4 @@ services:
 
 volumes:
   qdrant_storage:
+  agent_data:

@@ -110,7 +110,7 @@ VITE_CHAT_API_BASE_URL=/agent-api   # 同域相对路径
 | 看日志 | `docker compose logs -f agent` |
 | 重启 | `docker compose restart agent` |
 | 手动全量同步 | `docker compose exec agent .venv/bin/python -m scripts.sync_articles --full` |
-| 备份 | `data/` 目录（会话 sqlite）+ qdrant 卷；重灌知识库只需重跑全量同步 |
+| 备份 | `docker run --rm -v <项目名>_agent_data:/data -v $(pwd):/backup alpine tar czf /backup/agent-data.tgz /data`（会话 sqlite）；知识库可随时重跑全量同步重建 |
 | 升级 | `git pull && docker compose up -d --build` |
 | 换 embedding 模型 | 改 `.env.production` → `docker compose down` → 删 qdrant 卷 → `up -d` → 全量同步 |
 
@@ -118,6 +118,12 @@ VITE_CHAT_API_BASE_URL=/agent-api   # 同域相对路径
 
 - **容器起不来，日志报 `Missing credentials`**：`.env.production` 的 key 为空——服务启动会构建
   embedding/LLM 客户端，key 缺失直接快速失败（不会带病运行）。检查 `env_file` 是否被加载。
+- **`sqlite3.OperationalError: unable to open database file`**：data 目录容器内无写权限。
+  已用 named volume（`agent_data`）解决——首次挂载自动继承镜像内 app 用户属主。
+  若改回 bind mount（`./data`），宿主机需 `mkdir -p data && chown -R 1000:1000 data`（镜像固定 UID 1000）。
+- **宿主机直接跑脚本报 `Name or service not known`**：没带 `APP_ENV`，读了 `.env.development`
+  里的本地开发域名（www.blog.test 仅存在于开发机）。宿主机跑须 `APP_ENV=production uv run ...`；
+  推荐统一走容器（compose 已注入正确的 env_file）。
 - **前端回答不是流式（攒一坨一次出现）**：nginx 没关缓冲，检查 `proxy_buffering off`。
 - **限流把所有用户当成一个人**：直连 uvicorn 时 `request.client.host` 是反代 IP——镜像 CMD 已带
   `--proxy-headers --forwarded-allow-ips=127.0.0.1`，nginx 需传 `X-Forwarded-For`（上面配置已含）。
