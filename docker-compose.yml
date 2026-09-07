@@ -8,8 +8,6 @@ services:
     ports:
       - "127.0.0.1:6333:6333"
     networks:
-      # 双网络：default 里与 qdrant 互通；dev-network 里供 nginx / php-fpm 按服务名访问
-      - default
       - liangqy-dev_dev-network
 
   agent:
@@ -24,8 +22,6 @@ services:
       # 只绑本机，由 nginx 反代对外；如需直连调试再改
       - "127.0.0.1:8000:8000"
     networks:
-      # 双网络：default 里与 qdrant 互通；dev-network 里供 nginx / php-fpm 按服务名访问
-      - default
       - liangqy-dev_dev-network
     volumes:
       # named volume 而非 bind mount：首次使用会继承镜像内 /app/data 的属主（app 用户），
