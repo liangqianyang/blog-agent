@@ -86,7 +86,7 @@ VITE_CHAT_API_BASE_URL=/agent-api   # 同域相对路径
 2. 服务器 `.env` 追加：
    ```ini
    BLOG_AGENT_ENABLED=true
-   BLOG_AGENT_URL=http://127.0.0.1:8000     # 同机部署直连
+   BLOG_AGENT_URL=http://agent:8000     # 见下方"容器网络"，不能写 127.0.0.1
    BLOG_AGENT_SYNC_TOKEN=<与 agent .env.production 一致的强随机串>
    ```
 3. `php artisan config:clear`
@@ -94,6 +94,17 @@ VITE_CHAT_API_BASE_URL=/agent-api   # 同域相对路径
    ```bash
    php artisan queue:work --queue=default,blog-agent --tries=3
    ```
+   supervisor 方式（本仓库生产即此配置）：改 `/etc/supervisor/supervisord.conf` 的
+   `[program:laravel-worker]` command 后，`supervisorctl reread && supervisorctl update && supervisorctl restart "laravel-worker:*"`
+
+### 容器网络：Laravel 容器如何访问 agent 容器
+
+Laravel 跑在 php-fpm 容器里，agent 跑在独立 compose 项目里，`127.0.0.1:8000` 不通。两个方案：
+
+- **方案 A（推荐）**：`docker network connect <agent网络名> <php容器名>`，然后 `BLOG_AGENT_URL=http://agent:8000`
+- **方案 B**：agent compose 的 ports 追加 `"172.17.0.1:8000:8000"`，然后 `BLOG_AGENT_URL=http://172.17.0.1:8000`
+
+验证：`docker exec <php容器> php -r "echo @file_get_contents('http://agent:8000/api/health') ?: 'FAIL';"`
 
 ## 六、验收清单
 
