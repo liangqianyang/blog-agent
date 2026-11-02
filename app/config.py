@@ -22,15 +22,15 @@ class Settings(BaseSettings):
     blog_api_base: str = "http://www.blog.test/api"
 
     # 对话 LLM（OpenAI 兼容）
-    chat_api_base_url: str = "https://open.bigmodel.cn/api/paas/v4"
+    chat_api_base_url: str = "https://api.deepseek.com"
     chat_api_key: str = ""
-    chat_model: str = "glm-4-flash"
+    chat_model: str = "deepseek-chat"
     chat_temperature: float = 0.3
 
     # Embedding（OpenAI 兼容 /embeddings）
-    embedding_api_base_url: str = "https://open.bigmodel.cn/api/paas/v4"
+    embedding_api_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     embedding_api_key: str = ""
-    embedding_model: str = "embedding-3"
+    embedding_model: str = "text-embedding-v4"
     embedding_dims: int = 1024
 
     # Qdrant

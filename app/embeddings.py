@@ -1,7 +1,7 @@
 """Embedding 客户端：OpenAI 兼容接口，换供应商只改本文件。
 
-智谱 embedding-3 约束（已核验官方文档）：/embeddings 端点，dimensions ∈ {256,512,1024,2048}，
-单条输入 ≤3072 token，单请求 ≤64 条。批次取 32 留余量。
+百炼 text-embedding-v4 约束（已核验官方文档）：/embeddings 端点，dimensions 可选
+{64,128,256,512,768,1024,1536,2048}，单条输入 ≤8192 token，单请求 ≤10 条。批次取 10 顶格。
 """
 
 import asyncio
@@ -10,7 +10,7 @@ from langchain_openai import OpenAIEmbeddings
 
 from app.config import Settings, get_settings
 
-_BATCH_SIZE = 32
+_BATCH_SIZE = 10
 _BATCH_PAUSE = 0.3
 
 

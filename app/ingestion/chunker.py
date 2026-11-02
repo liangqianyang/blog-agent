@@ -9,7 +9,7 @@ from bs4.element import Tag
 # 打包参数（字符数）
 TARGET_SIZE = 500
 HARD_CAP = 1200
-ATOMIC_SPLIT_AT = 3000  # 超长代码块/表格的拆分阈值（embedding 输入 ≤3072 token）
+ATOMIC_SPLIT_AT = 3000  # 超长代码块/表格的拆分阈值（当前 embedding 上限 8192 token，留检索粒度）
 
 _HEADING_LEVELS = {"h1": 1, "h2": 2, "h3": 3, "h4": 4}
 _CONTAINER_TAGS = {"div", "section", "article", "main", "figure"}

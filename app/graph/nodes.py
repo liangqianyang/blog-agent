@@ -81,7 +81,7 @@ def make_nodes(indexer, grader_llm, generator_llm, settings):
             f"[{i}] {d.metadata.get('article_title', '')} | {d.metadata.get('heading_path', '')}\n{d.page_content[:600]}"
             for i, d in enumerate(docs, start=1)
         )
-        # json_mode：glm-4-flash 的 function calling 参数易畸形（实测），json_object 响应稳定
+        # json_mode：小模型 function calling 参数易畸形，json_object 响应稳定（DeepSeek 同样适用）
         structured = grader_llm.with_structured_output(GradeDocuments, method="json_mode")
         try:
             grade: GradeDocuments = await structured.ainvoke(
